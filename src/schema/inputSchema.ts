@@ -29,7 +29,8 @@ export const newFileSchema = z.object({
   name: z
     .string({ message: "Name is required" })
     .nonempty({ message: "Name is required" })
-    .min(3, { message: "Name must be atleast 3 characters" }),
+    .min(3, { message: "Name must be atleast 3 characters" })
+      .regex(/^\S*$/, "Name cannot contain spaces"),
   duedate: z.string().nullable().optional(),
   sender: z.string().nullable().optional(),
   receiver: z.string().nullable().optional(),

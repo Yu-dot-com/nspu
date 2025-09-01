@@ -32,8 +32,6 @@ type FileRow = {
 // Type for insertion (omit id)
 type InsertFileRow = Omit<FileRow, "id">;
 
-
-
 const NewFileBox = () => {
   const { isOpen, setOpen } = useBox();
   const [filePath, setFilePath] = useState<string>("");
@@ -44,6 +42,7 @@ const NewFileBox = () => {
   const [size, setsize] = useState<number | null>(null);
   const { refetch } = useFile();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const {
     data: Cdata,
@@ -82,126 +81,135 @@ const NewFileBox = () => {
   if (Derror) return <p className="text-red-500">Failed to load files</p>;
 
   const onSubmit: SubmitHandler<newFile> = async (data) => {
+    setIsUploading(true);
 
-    const format = (str: string) =>
-      str
-        .trim()
-        .replace(/[\s\u200B-\u200D\uFEFF]/g, "_")
-        .replace(/[^a-zA-Z0-9_\-\.\/]/g, "");
+    try {
+      const format = (str: string) =>
+        str
+          .trim()
+          .replace(/[\s\u200B-\u200D\uFEFF]/g, "_")
+          .replace(/[^a-zA-Z0-9_\-\.\/]/g, "");
 
-    console.log(data.category_id);
+      console.log(data.category_id);
 
-    const department_name = Ddata.find(
-      (d) => d.id === data.department_ids
-    )?.name;
+      const department_name = Ddata.find(
+        (d) => d.id === data.department_ids
+      )?.name;
 
-    const categoryName = Cdata.find((c) => c.id === data.category_id)?.name;
+      const categoryName = Cdata.find((c) => c.id === data.category_id)?.name;
 
-    if (!fileBuffer) {
-      alert("Please choose a file first");
-    }
-    const filepath = data.name;
-    const filename = filepath.split("/").pop();
-    const uniquefilename = `${categoryName}/${Date.now()}_${filename}`;
-    const realfilename = format(uniquefilename);
-    const mimeType = mime.getType(filename) || "application/octet-stream";
-    const fileBlob = new Blob([fileBuffer]);
-    const dueDateValue = data.duedate === "" ? null : data.duedate;
-
-    const { data: UploadData, error: UploadError } = await supabase.storage
-      .from("userfile")
-      .upload(realfilename, fileBlob, { upsert: true });
-
-    if (UploadError) {
-      Setmessage("File Upload Failed");
-      setShowAlert(true);
-      setOpen(true);
-      return;
-    }
-
-    const { error: insertError, data: insertData} = await supabase
-      .from("files")
-      .insert<InsertFileRow>([
-        {
-          name: data.name,
-          path: uniquefilename,
-          filetype: data.filetype,
-          category_id: data.category_id,
-          department_ids: data.department_ids,
-          duedate: dueDateValue,
-          sender: data.sender,
-          receiver: data.receiver,
-          visible: data.visible,
-          important: data.important,
-          inboxoroutbox: data.inboxoroutbox,
-          size: size,
-        },
-      ])
-      .select()
-      .single();
-
-    if (insertError || !insertData) {
-      Setmessage("Something went wrong ");
-      setShowAlert(true);
-      return;
-    }
-
-    if (insertData.department_ids === null) {
-      Setmessage("File Uploaded Successfully ");
-    setShowAlert(true);
-      console.log("electronAPI:", window.electronAPI);
-      if (window.electronAPI?.notify) {
-        window.electronAPI.notify({
-          title: "School added New File",
-          body: `A new file "${insertData.name}" has been uploaded to School.`,
-        });
-      } else {
-        console.warn("electronAPI.notify is not available!");
+      if (!fileBuffer) {
+        alert("Please choose a file first");
       }
-    }else{
-      const { data: deptUser, error: deptError } = await supabase
-      .from("users")
-      .select("id")
-      .in("department_id", data?.department_ids);
-    if (deptError) {
-      Setmessage("Something went wrong ");
-      setShowAlert(true);
-    }
+      const filepath = data.name;
+      const filename = filepath.split("/").pop();
+      const uniquefilename = `${categoryName}/${Date.now()}_${filename}`;
+      const realfilename = format(uniquefilename);
+      const mimeType = mime.getType(filename) || "application/octet-stream";
+      const fileBlob = new Blob([fileBuffer]);
+      const dueDateValue = data.duedate === "" ? null : data.duedate;
 
-    const notifications = deptUser.map((u) => ({
-      file_id: insertData.id,
-      user_id: u.id,
-      new_file: true,
-      is_read: false,
-      one_day: false,
-      two_day: false,
-      three_day: false,
-      four_day: false,
-      five_day: false,
-    }));
+      const { data: UploadData, error: UploadError } = await supabase.storage
+        .from("userfile")
+        .upload(realfilename, fileBlob, { upsert: true });
 
-    const { error: notiError } = await supabase
-      .from("notifications")
-      .insert(notifications);
-
-    if (notiError) alert(notiError);
-
-    Setmessage("File Uploaded Successfully ");
-    setShowAlert(true);
-    deptUser.forEach((u) => {
-      console.log("electronAPI:", window.electronAPI);
-      if (window.electronAPI?.notify) {
-        window.electronAPI.notify({
-          title: "New File Uploaded",
-          body: `A new file "${insertData.name}" has been uploaded for your department.`,
-        });
-      } else {
-        console.warn("electronAPI.notify is not available!");
+      if (UploadError) {
+        Setmessage("File Upload Failed");
+        setShowAlert(true);
+        setOpen(true);
+        return;
       }
-    });
-    }
 
-    refetch();
+      const { error: insertError, data: insertData } = await supabase
+        .from("files")
+        .insert<InsertFileRow>([
+          {
+            name: data.name,
+            path: uniquefilename,
+            filetype: data.filetype,
+            category_id: data.category_id,
+            department_ids: data.department_ids,
+            duedate: dueDateValue,
+            sender: data.sender,
+            receiver: data.receiver,
+            visible: data.visible,
+            important: data.important,
+            inboxoroutbox: data.inboxoroutbox,
+            size: size,
+          },
+        ])
+        .select()
+        .single();
+
+      if (insertError || !insertData) {
+        Setmessage("Something went wrong ");
+        setShowAlert(true);
+        return;
+      }
+
+      if (insertData.department_ids === null) {
+        Setmessage("File Uploaded Successfully ");
+        setShowAlert(true);
+        console.log("electronAPI:", window.electronAPI);
+        if (window.electronAPI?.notify) {
+          window.electronAPI.notify({
+            title: "School added New File",
+            body: `A new file "${insertData.name}" has been uploaded to School.`,
+          });
+        } else {
+          console.warn("electronAPI.notify is not available!");
+        }
+      } else {
+        const { data: deptUser, error: deptError } = await supabase
+          .from("users")
+          .select("id")
+          .in("department_id", data?.department_ids);
+        if (deptError) {
+          Setmessage("Something went wrong ");
+          setShowAlert(true);
+        }
+
+        const notifications = deptUser.map((u) => ({
+          file_id: insertData.id,
+          user_id: u.id,
+          new_file: true,
+          is_read: false,
+          one_day: false,
+          two_day: false,
+          three_day: false,
+          four_day: false,
+          five_day: false,
+        }));
+
+        const { error: notiError } = await supabase
+          .from("notifications")
+          .insert(notifications);
+
+        if (notiError) alert(notiError);
+
+        Setmessage("File Uploaded Successfully ");
+        setShowAlert(true);
+        deptUser.forEach((u) => {
+          console.log("electronAPI:", window.electronAPI);
+          if (window.electronAPI?.notify) {
+            window.electronAPI.notify({
+              title: "New File Uploaded",
+              body: `A new file "${insertData.name}" has been uploaded for your department.`,
+            });
+          } else {
+            console.warn("electronAPI.notify is not available!");
+          }
+        });
+      }
+
+      refetch();
+    } catch (err) {
+      console.error(err);
+      Setmessage("Unexpected error occurred");
+      setShowAlert(true);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const chooseFile = async () => {
@@ -242,6 +250,12 @@ const NewFileBox = () => {
           </select>
         </div>
 
+        {isUploading && (
+          <div className="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+            <div className="border-4 border-t-blue-500 border-gray-200 rounded-full w-12 h-12 animate-spin"></div>
+          </div>
+        )}
+
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col justify-between h-full"
@@ -261,7 +275,9 @@ const NewFileBox = () => {
             <span className="text-sm">Upload an Image or file </span>
           </div>
           {errors.path && (
-            <span className="text-sm text-red-700">{errors.path.message as string}</span>
+            <span className="text-sm text-red-700">
+              {errors.path.message as string}
+            </span>
           )}
 
           {/* filename */}

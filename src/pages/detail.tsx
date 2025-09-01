@@ -26,6 +26,7 @@ type FileData = {
   inboxoroutbox: "inbox" | "outbox";
   created_at: string;
 };
+ const imageTypes=["png","jpg","jpeg","gif","webp"];
 
 const Detail = () => {
   const { id } = useParams();
@@ -139,19 +140,12 @@ const Detail = () => {
         {/* preview */}
         {/* preview */}
         <div className="flex justify-center items-center mt-10  w-full h-[80vh] border-orange-100 rounded-lg p-4">
-          {fileData.filetype?.includes("image") ? (
+          {imageTypes.includes(fileData.filetype) ? (
             // Images
             <img
               src={publicUrl}
               alt={fileData.name}
               className="max-h-full max-w-full object-contain"
-            />
-          ) : fileData.filetype === "pdf" ? (
-            // PDFs
-            <iframe
-              src={publicUrl}
-              className="w-full h-full rounded-lg"
-              title="PDF Preview"
             />
           ) : (
             // Other files: show download button

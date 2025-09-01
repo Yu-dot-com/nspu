@@ -3,7 +3,12 @@ import { useFile } from "../hooks/useFile";
 import React, { useEffect, useState, useRef } from "react";
 import { PiFile } from "react-icons/pi";
 import { RiStarFill } from "react-icons/ri";
-import { MdDeleteOutline } from "react-icons/md";
+import {
+  MdDeleteOutline,
+  MdCancel,
+  MdCheckCircle,
+  MdDownloadForOffline,
+} from "react-icons/md";
 import { CiMenuKebab } from "react-icons/ci";
 import { useSearch } from "../utils/SearchContext";
 import { useUser } from "../hooks/useUser";
@@ -66,7 +71,7 @@ const FileBar = ({ filter, isImportant, isHidden }: filterProps) => {
       {
         y: 0,
         opacity: 1,
-        duration: 0.5,
+        duration: 0.3,
         stagger: 0.1,
         ease: "power3.out",
         scrollTrigger: {
@@ -216,102 +221,56 @@ const FileBar = ({ filter, isImportant, isHidden }: filterProps) => {
         ) : (
           filteredFiles.map((n: fileBarProps) => (
             <Link key={n.id} to={`/detail/${n.id}`}>
-              <div className="file-item flex flex-row m-2 border-b-2 border-card text-gray-200 hover:shadow-lg p-2 justify-between">
-                <div>
-                  <div className="flex flex-row justify-center items-center">
-                    <PiFile className="mt-1 me-1 text-black" />
-                    <h1 className="text-black">{n.name}</h1>
-                    <RiStarFill
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleImportant(n.id, !!n.important);
-                      }}
-                      className={`ms-2 cursor-pointer text-xl ${
-                        n.important ? "text-yellow-400" : "text-gray-600"
-                      }`}
-                    />
-                  </div>
-                  <div>
-                    <span className="text-sm font-semibold text-gray-800 ms-6">
-                      {(n.size / (1024 * 1024)).toFixed(2)} MB
-                    </span>
-                  </div>
+              <div className="file-item group flex flex-row justify-between items-center m-2 border-b border-card p-2 rounded-sm hover:shadow-md bg-white transition">
+                {/* Left: file icon + name */}
+                <div className="flex items-center gap-2">
+                  <PiFile className="text-black" />
+                  <h1 className="text-black font-medium">{n.name}</h1>
                 </div>
 
-                <div className="flex flex-col justify-end items-end gap-2">
-                  <div className="flex flex-row gap-3 relative">
-                    <h1 className="text-sm text-red-900">
-                      Due: {n.duedate ? n.duedate.split("T")[0] : "None"}
-                    </h1>
+                {/* Right: actions */}
+                <div className="flex items-center gap-2">
+                  {/* Default: due date and delete */}
+                  <span className="text-sm text-red-900 group-hover:hidden">
+                    Due: {n.duedate ? n.duedate.split("T")[0] : "None"}
+                  </span>
 
-                    <div>
-                      <CiMenuKebab
-                        onClick={() => {
-                          setOpenMenuId(openMenuId === n.id ? null : n.id);
-                        }}
-                        className="cursor-pointer"
-                      />
-                      {openMenuId === n.id && (
-                        <div className="absolute right-0 bg-gray-300 mt-2 w-32 rounded-md shadow-lg z-10">
-                          <button
-                            onClick={() => {
-                              handleNoti(n.id, CurrentUser?.id);
-                              setNoti(!noti);
-                            }}
-                            className="w-full text-left px-4 py-2 text-gray-700 rounded-md hover:bg-gray-400"
-                          >
-                            {noti ? "Notify" : "Turn On Noti"}
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleDelete(n.id, n.path);
-                            }}
-                            className="w-full text-left px-4 py-2 text-gray-700 rounded-md hover:bg-gray-400"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-row gap-5">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleStatus(n.id, n.status);
-                      }}
-                      className="w-fit flex flex-row justify-end items-end border-2 border-bg-button rounded-full text-sm text-text hover:bg-gray-200 px-2 py-1 hover:text-black"
-                    >
-                      {n.status ? "Done " : "Mark As Done"}
-                    </button>
-
+                  {/* Hover: Mark as Done and Download */}
+                  <div className="hidden group-hover:flex gap-4">
                     <button
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         handleDownload(n.path);
                       }}
-                      className="w-fit flex flex-row justify-end items-end bg-green rounded-full text-sm text-white hover:bg-gray-200 px-2 py-1 hover:text-black"
+                      className="px-2 py-1 text-sm bg-green-500 bg-blue-400 text-white rounded hover:bg-green-600"
                     >
-                      Download
+                      <MdDownloadForOffline />
                     </button>
 
-                    {CurrentUser?.role === "admin" && (
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleDelete(n.id, n.path);
-                        }}
-                      >
-                        <MdDeleteOutline className="hover:bg-gray-300 hover:text-black hover:rounded-full text-2xl text-text" />
-                      </button>
-                    )}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleStatus(n.id, n.status);
+                      }}
+                      className="px-2 py-1 text-sm  text-white rounded hover:bg-green-600 "
+                    >
+                      {n.status ? (
+                        <MdCheckCircle className="bg-blue-400" />
+                      ) : (
+                        <MdCancel className="bg-red-400" />
+                      )}
+                    </button>
+
+                    <MdDeleteOutline
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleDelete(n.id, n.path);
+                      }}
+                      className="text-red-500 text-xl cursor-pointer "
+                    />
                   </div>
                 </div>
               </div>

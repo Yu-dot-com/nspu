@@ -35,10 +35,10 @@ const NotiBar = ({ onClose }: NotiBarProps) => {
   return (
     <div
       ref={panelRef}
-      className="fixed top-0 right-0 h-screen w-96 bg-orange-100 shadow-2xl z-50 flex flex-col"
+      className="fixed top-0 right-0 h-screen w-96 bg-bg-color shadow-2xl z-50 flex flex-col"
     >
       {/* Header */}
-      <div className="flex justify-between items-center px-5 py-4 border-b bg-bg-button">
+      <div className="flex justify-between items-center px-5 py-4 border-b bg-text">
         <h2 className="text-lg font-semibold text-gray-800">Notifications</h2>
         <IoClose
           onClick={handleClose}
@@ -66,7 +66,7 @@ const NotiBar = ({ onClose }: NotiBarProps) => {
               to={`/detail/${item.file_id}`}
               onClick={handleClose}
             >
-              <div className="bg-orange-50 p-3 cursor-pointer shadow-sm hover:shadow-md transition">
+              <div className="bg-bg-color p-3 cursor-pointer shadow-sm hover:shadow-md transition">
                 <div className="flex flex-row gap-1">
                   <PiFile className="mt-1 me-1 text-black" />
                   <h3 className="font-medium text-gray-800">{item.title}</h3>
