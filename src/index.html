@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Your App Title</title>
+
+  <!-- Development CSP only (allows eval for WDS hot reload) -->
+<!-- index.html -->
+
+<!-- index.html -->
+
+<meta
+  http-equiv="Content-Security-Policy"
+  content="
+    default-src 'self' data:;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval';
+    connect-src 'self' https://hjgbaakpsgllnjgkjmmh.supabase.co;
+    img-src 'self' data: https://hjgbaakpsgllnjgkjmmh.supabase.co;
+    style-src 'self' 'unsafe-inline';
+    frame-src 'self' https://docs.google.com https://docs.googleusercontent.com https://view.officeapps.live.com;
+  "
+/>
+
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
