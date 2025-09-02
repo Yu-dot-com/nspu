@@ -47,6 +47,7 @@ function createWindow() {
     height: 800,
     minWidth: 1000,
     minHeight: 800,
+    title: "NSPU File Management System",
     icon: getIconPath("icon.png"),
     webPreferences: {
       preload:  MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,

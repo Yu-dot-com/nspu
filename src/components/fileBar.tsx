@@ -236,41 +236,50 @@ const FileBar = ({ filter, isImportant, isHidden }: filterProps) => {
                   </span>
 
                   {/* Hover: Mark as Done and Download */}
-                  <div className="hidden group-hover:flex gap-4">
+                  <div className="hidden group-hover:flex gap-2">
+                    {/* Download Button */}
                     <button
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         handleDownload(n.path);
                       }}
-                      className="px-2 py-1 text-sm bg-green-500 bg-blue-400 text-white rounded hover:bg-green-600"
+                      className="flex items-center justify-center p-2 rounded-full bg-blue-400 text-white hover:bg-blue-600 shadow transition"
                     >
-                      <MdDownloadForOffline />
+                      <MdDownloadForOffline className="text-lg" />
                     </button>
 
+                    {/* Status Button */}
                     <button
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         handleStatus(n.id, n.status);
                       }}
-                      className="px-2 py-1 text-sm  text-white rounded hover:bg-green-600 "
+                      className={`flex items-center justify-center p-2 rounded-full text-white shadow transition ${
+                        n.status
+                          ? " bg-blue-400 hover:bg-blue-600"
+                          : "bg-red-400 hover:bg-red-600"
+                      }`}
                     >
                       {n.status ? (
-                        <MdCheckCircle className="bg-blue-400" />
+                        <MdCheckCircle className="text-lg" />
                       ) : (
-                        <MdCancel className="bg-red-400" />
+                        <MdCancel className="text-lg" />
                       )}
                     </button>
 
-                    <MdDeleteOutline
+                    {/* Delete Button */}
+                    <button
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         handleDelete(n.id, n.path);
                       }}
-                      className="text-red-500 text-xl cursor-pointer "
-                    />
+                      className="flex items-center justify-center p-2 rounded-full bg-red-400 text-white hover:bg-red-600 shadow transition"
+                    >
+                      <MdDeleteOutline className="text-lg" />
+                    </button>
                   </div>
                 </div>
               </div>
